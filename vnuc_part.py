@@ -161,7 +161,7 @@ while True:
     line = exposfile.readline()
     if line is '':
         break
-    splitline = line.split('\t')
+    splitline = line.split("\t")
     center = float(splitline[0])
     sym = splitline[1]
     expo = float(splitline[2])
@@ -222,13 +222,28 @@ for i in range(len(basis)):
             vnuc[j][i] = vnuc[i][j]
 
 
+# Read in the xform.dat file for the contractions.
+contract = [ ]
+xformfile = open('xform.dat', 'r')
+contdat = xformfile.readlines()
+
+for i in range(len(contdat)):
+    line = contdat[i].split(" ")
+    contract.append([float(j) for j in line if j is not ''])
+
+xformfile.close()
+
+xformmat = numpy.matrix(contract)
+vmat = numpy.matrix(vnuc, float)
+
+temp = numpy.dot(vmat,numpy.transpose(xformmat))
+vxformed = numpy.dot(xformmat,temp)
+
+temp = vxformed.tolist()
+
 # Write matrix out to file to be read by the radial DVR insertion code.
 dirfile = open('vnucpart.dat', 'w')
-for i in range(len(basis)):
-    line = '  '.join(str(j) for j in vnuc[i])
+for i in range(len(vxformed)):
+    line = '  '.join(str('%.8E'%j) for j in temp[i])
     dirfile.write(line+'\n')
 dirfile.close()
-
-
-
-
